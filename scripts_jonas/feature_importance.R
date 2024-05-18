@@ -28,3 +28,21 @@ for(xgbmodel in xgbmodels){
   }
 }
 write.csv(alldat,"../../allimportance.csv")
+
+test_feature_model_match = function(model,feature_names=NULL){
+  if(class(model)=="character"){
+    if(!file.exists(model)){stop("model file does not exist")}
+    modelfile=model
+    if(!file.exists(gsub("\\.model","\\.rda",model))){stop("feature names were not found as RDA file in same folder as the model")}else{
+      model=xgboost::xgb.load(model)
+      feature_names=get(load(gsub("\\.model","\\.rda",modelfile)))
+    }
+  }else{if(is.null(feature_names)){stop("feature names should be given if model is an xgb.Booster object")}}
+  result=tryCatch({importance_matrix=xgb.importance(feature_names=feature_names,model=model);TRUE}, error = function(e) {
+    # Print the error message
+  FALSE
+
+    # Continue the loop or execute other code as needed
+  })
+  return(result)
+}
