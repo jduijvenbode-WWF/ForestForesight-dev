@@ -9,51 +9,47 @@ create_grid <- function(poly,num_rows,num_cols) {
   return(grid)
 }
 data(countries)
-setwd("C:/data")
-arcpy_location='\"C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe\"'
-script_location='C:/data/git/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
-ff_folder="C:/data/storage"
+setwd("C:/data/dashboard_data")
+arcpy_location <- '\"C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe\"'
+script_location <- 'C:/data/git/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
+ff_folder <- "C:/data/storage"
 proc_date <- "2024-05-01"
-train_start= "2023-05-01"
-train_end= "2023-10-01"
-countrynames=c("Burundi","Laos","Colombia","Gabon","Sarawak","Bolivia","Madre de Dios","Suriname","Peru","Kalimantan")
-isos=c("BDI","LAO","COL","GAB","MYS","BOL","PER","SUR","PER","IDN")
+train_start <-  "2023-05-01"
+train_end <-  "2023-10-01"
+countrynames <- c("Burundi","Laos","Colombia","Gabon","Sarawak","Bolivia","Madre de Dios","Suriname","Peru","Kalimantan")
+isos <- c("BDI","LAO","COL","GAB","MYS","BOL","PER","SUR","PER","IDN")
 gadm_s <- terra::vect("C:/data/storage/contextualization/GADM.gpkg")
-for(x in seq(length(countrynames))[1]){
+for (x in seq(length(countrynames))) {
   country <- countrynames[x]
   cat(paste("processing",country,"\n"))
   countryiso <- isos[x]
   threshold <- 0.95
   dir.create(country)
   setwd(country)
-  if(!file.exists(paste0(country,"_",proc_date,".tif"))){
-    #shape <- terra::vect(countries)[which(countries$group==country),]
+  if (!file.exists(paste0(country,"_",proc_date,".tif"))) {
     shape <- terra::vect(countries)[which(countries$iso3 == countryiso),]
-    if(country=="Sarawak"){shape=terra::disagg(shape)[9]}
-    if(country=="Kalimantan"){shape=terra::disagg(shape)[133]}
-    if(country=="Madre de Dios"){shape=aggregate(gadm_s[which(gadm_s$"NAME_1" == "Madre de Dios"),])}
-    modelname=countries$group[which(countries$iso3==countryiso)]
-    modelpath=file.path(ff_folder,"models",modelname,paste0(modelname,".model"))
-    if(!file.exists(modelpath)){stop(paste(modelpath,"does not exist"))}
-    #b <- ForestForesight::train_predict_raster(shape = shape,prediction_date = proc_date,train_start = train_start,train_end=train_end,ff_folder = ff_folder,verbose = T)
-    # b <- train_predict_raster(shape = shape,prediction_date = proc_date,train_start = train_start,train_end=train_end,ff_folder = ff_folder,verbose = T,model=modelpath)
-    # terra::writeRaster(b,paste0(country,"_",proc_date,".tif"),overwrite = T)
-    shape=terra::project(shape,"epsg:3857")
+    if (country == "Sarawak") {shape <- terra::disagg(shape)[9]}
+    if (country == "Kalimantan") {shape <- terra::disagg(shape)[133]}
+    if (country == "Madre de Dios") {shape <- aggregate(gadm_s[which(gadm_s$"NAME_1" == "Madre de Dios"),])}
+    modelname <- countries$group[which(countries$iso3 == countryiso)]
+    modelpath <- file.path(ff_folder,"models",modelname,paste0(modelname,".model"))
+    if (!file.exists(modelpath)) {stop(paste(modelpath,"does not exist"))}
+    shape <- terra::project(shape,"epsg:3857")
     b <- terra::project(terra::rast(file.path(ff_folder,"predictions",countryiso,paste0(countryiso,"_",proc_date,".tif"))),"epsg:3857")
-    if(country %in% c("Sarawak","Kalimantan","Madre de Dios")){b=terra::crop(terra::mask(b,shape),shape)}
+    if (country %in% c("Sarawak","Kalimantan","Madre de Dios")) {b <- terra::crop(terra::mask(b,shape),shape)}
 
     #########dashboard version 2########
 
-    gadm=gadm_s
-    if(country=="Sarawak"){
+    gadm <- gadm_s
+    if (country == "Sarawak") {
       gadm <- gadm[which(gadm$COUNTRY == "Malaysia"), ]
-      gadm=gadm[terra::intersect(gadm,shape)]
-    }else{if(country=="Kalimantan"){
+      gadm <- gadm[terra::intersect(gadm,shape)]
+    }else{if (country == "Kalimantan") {
       gadm <- gadm[which(gadm$COUNTRY == "Indonesia"), ]
-      gadm=gadm[terra::intersect(gadm,shape)]
-    }else{if(country=="Madre de Dios"){
+      gadm <- gadm[terra::intersect(gadm,shape)]
+    }else{if (country == "Madre de Dios") {
       gadm <- gadm[which(gadm$COUNTRY == "Peru"), ]
-      gadm=gadm[terra::intersect(gadm,shape)]
+      gadm <- gadm[terra::intersect(gadm,shape)]
     }else{
       gadm <- gadm[which(gadm$COUNTRY == country), ]
     }
@@ -70,7 +66,7 @@ for(x in seq(length(countrynames))[1]){
     ecobiome$ecobiome <- paste(ecobiome$Biome,ecobiome$Ecoregion,sep = "_")
     wdpa2 <- aggregate(wdpa)
     wdpa <- terra::intersect(wdpa, wdpa2)
-    if(length(wdpa)>0){nonwdpa <- terra::as.polygons(terra::ext(wdpa)) - wdpa}else{nonwdpa <- terra::as.polygons(terra::ext(wdpa))}
+    if (length(wdpa) > 0) {nonwdpa <- terra::as.polygons(terra::ext(wdpa)) - wdpa}else {nonwdpa <- terra::as.polygons(terra::ext(wdpa))}
 
     nonwdpa$status = "not protected"
     wdpa$status = "protected"
@@ -119,9 +115,9 @@ for(x in seq(length(countrynames))[1]){
 
 
     # Convert each part to polygons
-    extpols=create_grid(terra::ext(colras2),2,2)
+    extpols <- create_grid(terra::ext(colras2),2,2)
     # Combine the resulting polygons
-    pollist=sapply(1:length(extpols),function(x) terra::as.polygons(terra::crop(newras,extpols[x,]), dissolve = F))
+    pollist <- sapply(1:length(extpols),function(x) terra::as.polygons(terra::crop(colras2,extpols[x,]), dissolve = F))
     pols <- do.call(rbind, pollist)
 
 
@@ -131,7 +127,7 @@ for(x in seq(length(countrynames))[1]){
     pols2 = cbind(pols, polvals)
     pols2$x = as.numeric(round(terra::crds(terra::centroids(pols2))[,1],3))
     pols2$y = as.numeric(round(terra::crds(terra::centroids(pols2))[,2],3))
-    terra::writeVector(pols2, paste0(country,"_highalerts.shp"),overwrite = T)
+    terra::writeVector(pols2, paste0(country,"_highalerts.shp"), overwrite = T)
     #code to extract the high alert values and amount of normal alerts for wdpa, ecobiome and gadm separately
     wdpa2 = terra::intersect(wdpa, aggregate(gadm))
     eventcount = colras > 0
@@ -164,7 +160,7 @@ for(x in seq(length(countrynames))[1]){
     zip(paste0(country,"_contextualization.zip"),files)
 
     #tile the raster
-    if(file.exists(file.path(getwd(),paste0(country,".tpkx")))){file.remove(file.path(getwd(),paste0(country,".tpkx")))}
+    if (file.exists(file.path(getwd(),paste0(country,".tpkx")))) {file.remove(file.path(getwd(),paste0(country,".tpkx")))}
     system(paste(arcpy_location,script_location,paste0('\"',file.path(getwd(),paste0(country,".tif")),'\"'),paste0('\"',file.path(getwd(),paste0(country,".tpkx")),'\"')))
   }
   setwd("../")
