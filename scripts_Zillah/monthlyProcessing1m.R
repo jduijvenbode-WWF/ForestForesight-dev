@@ -5,7 +5,7 @@ ff_folder = "D:/ff-dev/results"
 countrynames = unique(countries$group)
 proc_dates = as.character(daterange("2023-06-01","2024-02-01"))
 for (gt_month in c("1m", "3m")) {
-  for (proc_date in proc_dates) {
+  for (proc_date in proc_dates[2:9]) {
     for (x in seq(length(countrynames))) {
       country <- countrynames[x]
       setwd("D:/ff-dev/predictionsZillah/predictions/")
