@@ -3,8 +3,8 @@ library(sf)
 data(countries)
 ff_folder = "D:/ff-dev/results"
 countrynames = unique(countries$group)
-proc_dates = as.character(daterange("2023-06-01","2024-02-01"))
-for (gt_month in c("1m", "3m")) {
+proc_dates = as.character(daterange("2023-01-01","2023-04-01"))
+for (gt_month in c("12m")) {
   for (proc_date in proc_dates) {
     for (x in seq(length(countrynames))) {
       country <- countrynames[x]
@@ -21,8 +21,8 @@ for (gt_month in c("1m", "3m")) {
             b <- ForestForesight::train_predict_raster(shape = shape ,
                                                        prediction_date = proc_date,
                                                        ff_folder = ff_folder,
-                                                       train_start = "2022-01-01",
-                                                       train_end = "2022-12-01",
+                                                       train_start = "2021-01-01",
+                                                       train_end = "2021-12-01",
                                                        verbose = TRUE,
                                                        groundtruth_pattern = paste0("groundtruth",gt_month),
                                                        model_path = modelname,
@@ -32,8 +32,8 @@ for (gt_month in c("1m", "3m")) {
                                                        prediction_date = proc_date,
                                                        model = modelname,
                                                        ff_folder = ff_folder,
-                                                       model_path = modelname,
                                                        verbose = TRUE,
+                                                       model_path = modelname,
                                                        groundtruth_pattern = paste0("groundtruth",gt_month),
                                                        accuracy_csv = paste0("D:/ff-dev/predictionsZillah/accuracy_analysis/2ndYearTraining_", gt_month,".csv"))
           }
