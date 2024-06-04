@@ -37,7 +37,7 @@ predset = ff_prep(datafolder = "D:/ff-dev/results/preprocessed/",tiles = tile,
                   fltr_condition = ">0",addxy = F,
                   groundtruth_pattern = "groundtruth6m")
 
-defPred =  rast(paste0("D:/ff-dev/results/predictions/", tile,"/", tile, "_", date,"_predictions.tif"))>0
+defPred =  rast(paste0("D:/ff-dev/results/predictions/", tile,"/", tile, "_", date,"_predictions.tif"))>50
 
 predset$data_matrix$label=predset$data_matrix$label[defPred[predset$testindices][,1]]
 predset$data_matrix$features=predset$data_matrix$features[defPred[predset$testindices][,1],]
