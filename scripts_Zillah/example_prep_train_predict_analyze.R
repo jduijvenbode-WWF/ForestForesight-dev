@@ -55,9 +55,13 @@ for (tile in tiles) {
                       label_threshold = 1)
 
   prediction <- ff_predict(model = model, test_matrix = predset$data_matrix,
-                           indices = predset$testindices,
+                           indices = predset$testindices,groundtruth = predset$data_matrix$label,
                            templateraster = predset$groundtruthraster,
                            certainty = T)
+  # you can print the scores per tile
+  print(paste(tile, ": precision =", round(prediction$precision,2),
+              ", recall= ", round(prediction$recall,2),
+              ", F0.5-score =", round(prediction$F0.5,2)))
 
   raslist[[tile]] <- prediction$predicted_raster # add prediction to the list
 
