@@ -54,8 +54,10 @@ for (tile in tiles) {
                       fltr_condition = ">0",
                       label_threshold = 1)
 
-  prediction <- ff_predict(model = model, test_matrix = predset$data_matrix,
-                           indices = predset$testindices,groundtruth = predset$data_matrix$label,
+  prediction <- ff_predict(model = model,
+                           test_matrix = predset$data_matrix,
+                           indices = predset$testindices,
+                           groundtruth = predset$data_matrix$label,
                            templateraster = predset$groundtruthraster,
                            certainty = T)
   # you can print the scores per tile
