@@ -13,11 +13,12 @@ unique_method <- best_method_data %>%
   distinct(group, method)
 rm(best_method_data)
 new_models = c()
-for(x in seq(length(countrynames))){
+for(x in seq(76,length(countrynames))){
   country <- countrynames[x]
   group = countries$group[x]
   method = unique_method$method[unique_method==group]
-  cat(paste("processing",country,"using method: ",method, "\n"))
+  if(length(method)==0){method="lastYear_training"}
+  cat(paste("processing",country,"using method ",method, "\n"))
   setwd("D:/ff-dev/results/predictions/")
   if(!dir.exists(country)){dir.create(country)}
   setwd(country)
@@ -27,6 +28,7 @@ for(x in seq(length(countrynames))){
 
     # 1 year training or new country group model already trained
     if (grepl("1_year_training", method)|| any(new_models==group)){
+      cat("Existing model will be used \n")
       modelpath=file.path(ff_folder,"models",group,paste0(group,".model"))
       if(!file.exists(modelpath)){stop(paste(modelpath,"does not exist"))}
       tryCatch({
@@ -64,7 +66,7 @@ for(x in seq(length(countrynames))){
                                   verbose = TRUE,
                                   model_path = modelpath,
                                   label_threshold = 1)
-        new_models = c(new_model, group)
+        new_models = c(new_models, group)
         terra::writeRaster(b,paste0(country,"_",proc_date,".tif"),overwrite = T)
       }, error = function(e) {
         # Print the error message
