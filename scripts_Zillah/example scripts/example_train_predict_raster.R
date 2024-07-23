@@ -14,49 +14,55 @@ library(ForestForesight)
 data("countries")
 
 # Gabon will be used as an example country
-country="GAB" # use iso3 country code
+country = "GAB" # use iso3 country code
+
+# Set variables
+dir_ff = "D:/ff-dev/results" # Change to the directory containing the ff files
+threshold = 0.5 # When the model output exceeds this threshold, deforestation will be predicted
+
 
 ##  Example with pre-trained model ##
 
 # we will use the model provided by WWF which is trained on a group of countries
-group = countries$group[countries$iso3==country]
-modelname = paste0("D:/ff-dev/results/models/", group, "/", group, ".model")
+group = countries$group[countries$iso3 == country]
+modelname = file.path(dir_ff,"models", group, paste0(group, ".model"))
 
 # run train_predict_raster function
-prediction_pretrained = ForestForesight::train_predict_raster(country=country,
+prediction_pretrained = ForestForesight::train_predict_raster(country = country,
                                       prediction_date = "2023-01-01",
                                       model = modelname,
-                                      ff_folder = "D:/ff-dev/results", # folder containing the input data
+                                      ff_folder = dir_ff, # folder containing the input data
                                       verbose = TRUE,
                                       label_threshold = 1,
                                       model_path = modelname,
                                       # when ground truth is available a accuracy csv can be created
-                                      accuracy_csv = "D:/ff-dev/results/accuracy_analysis/example_Gabon_model.csv")
+                                      accuracy_csv = file.path(dir_ff,"accuracy_analysis", paste0("example", country, "model.csv")))
 
 # plot the prediction probabilities
 plot(prediction_pretrained)
-# plot deforestation prediction (threshold of 0.5)
-plot(prediction_pretrained>0.5)
+# plot deforestation prediction with predefined threshold
+plot(prediction_pretrained > threshold)
 
 ## Example without pre-trained model ##
 
-# Lets train a new model only on the data from Gabon
+# Let's train a new model only on the data from Gabon
 
-prediction_new_model = ForestForesight::train_predict_raster(country=country,
+prediction_new_model = ForestForesight::train_predict_raster(country = country,
                                                               prediction_date = "2023-01-01",
-                                                              train_start="2021-01-01", # the model will be trained on the year 2021
-                                                              train_end="2021-12-01",
-                                                              ff_folder = "D:/ff-dev/results", # folder containing the input data
+                                                              train_start = "2021-01-01", # the model will be trained on the year 2021
+                                                              train_end = "2021-12-01",
+                                                              ff_folder = dir_ff, # folder containing the input data
                                                               verbose = TRUE,
                                                               label_threshold = 1,
-                                                              model_path = "D:/ff-dev/results/GabonExampleModel.model", # where to save the model
+                                                              model_path = file.path(dir_ff,paste0(country, "ExampleModel.model")), # where to save the model
                                                               # when ground truth is available a accuracy csv can be created
-                                                              accuracy_csv = "D:/ff-dev/results/accuracy_analysis/example_Gabon_newmodel.csv")
+                                                              accuracy_csv = file.path(dir_ff,"accuracy_analysis", paste0("example", country, "newmodel.csv")))
 
 # plot the prediction probabilities
 plot(prediction_new_model)
-# plot deforestation prediction (threshold of 0.5)
-plot(prediction_new_model>0.5)
+# plot deforestation prediction with predefined threshold)
+plot(prediction_new_model > threshold)
+
 
 
 
