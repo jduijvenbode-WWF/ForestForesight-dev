@@ -6,7 +6,7 @@ countrynames = countries$iso3
 ff_folder = "D:/ff-dev/results"
 
 dates = daterange("2023-06-01","2023-12-01")
-groups = unique(countries$group)[1:7]
+groups = c(unique(countries$group)[1:7],"South America 1")
 
 for (group in groups){
   sel_countries = countries$iso3[countries$group == group]
@@ -36,7 +36,7 @@ for (group in groups){
                    "croplandcapacityover50p","diminishinghotspot",
                    "dpicoal","dpiconvgas","dpiconvoil","dpihydro",
                    "dpimetallicmining","dpinonmetallicmining",
-                   "dpiunconvgas","fwi","intensifyinghotspot",
+                   "dpiunconvgas","fwi","forestedgedensity","intensifyinghotspot",
                    "mennonitessmoothed", "miningsmoothed",
                    "newhotspot","palmoilmills", "persistanthotspot",
                    "soybeansmoothed","sporadichotspot")
@@ -48,7 +48,7 @@ for (group in groups){
                          modelfilename = paste0( "D:/ff-dev/predictionsZillah/models_2022/",group,"_exc.model"), # where to save the model
                          features = traindata_exc_features$features)
   for (country in sel_countries) {
-    shape <- terra::vect(countries)[which(countries$iso3 == country),]
+    shape <- countries[which(countries$iso3 == country),]
     tiles <- terra::vect(gfw_tiles)[shape,]$tile_id
     for (date in dates) {
       for (tile in tiles){
