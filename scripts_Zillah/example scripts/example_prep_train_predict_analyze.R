@@ -28,10 +28,16 @@ tiles <- terra::vect(gfw_tiles)[shape,]$tile_id # select tiles based on shape
 
 
 ## 1 ff_dqc ##
-# for this example we will use one of the tiles to check the data quality
+# For this example we will use one of the tiles to check the data quality
 dqc_dir = file.path(dir_ff,"preprocessed","input",tiles[2])
 data_quality = ff_dqc(folder_path = dqc_dir, # The path to the folder containing TIF files.
                       return_values = T) # Should the values of the rasters also be returned.
+print(attributes(data_quality))
+
+# Check if the extent is equal for all layers (or at least for whole 5 degrees)
+# Check if there are no doubles (meaning the same feature for the same tile for the same month)
+# Evaluate whether the coordinate system is similar for all files (and WGS84) and if the resolution is the same
+
 
 ## 2 ff_prep ##
 traindata <- ff_prep(
