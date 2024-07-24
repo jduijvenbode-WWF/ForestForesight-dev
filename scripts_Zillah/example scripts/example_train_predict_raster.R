@@ -28,15 +28,23 @@ group = countries$group[countries$iso3 == country]
 modelname = file.path(dir_ff,"models", group, paste0(group, ".model"))
 
 # run train_predict_raster function
-prediction_pretrained = ForestForesight::train_predict_raster(country = country,
-                                      prediction_date = "2023-01-01",
-                                      model = modelname,
-                                      ff_folder = dir_ff, # folder containing the input data
-                                      verbose = TRUE,
-                                      label_threshold = 1,
-                                      model_path = modelname,
-                                      # when ground truth is available a accuracy csv can be created
-                                      accuracy_csv = file.path(dir_ff,"accuracy_analysis", paste0("example", country, "model.csv")))
+prediction_pretrained <- ForestForesight::train_predict_raster(
+  country = country, # ISO3 country code. Either `shape` or `country` should be given
+  prediction_date = "2023-01-01", # Date for prediction in "YYYY-MM-DD" format
+  model = modelname, # Pre-trained model. If NULL, the function will train a model. Default is NULL
+  ff_folder = dir_ff, # Folder directory containing the input data
+  verbose = TRUE, # Logical value indicating whether to display progress messages. Default is TRUE
+  model_path = modelname, # The path for saving the model
+  accuracy_csv = file.path(dir_ff, "accuracy_analysis", paste0("example", country, "model.csv")), # Path to save accuracy metrics in CSV format. Default is NA (no CSV output)
+  shape = NULL, # Spatial object representing the shapefile. Either `shape` or `country` should be given.
+  train_start = NULL, # Starting date for training data in "YYYY-MM-DD" format.
+  train_end = NULL, # Ending date for training data in "YYYY-MM-DD" format.
+  ff_prep_params = NULL, # List of parameters for data preprocessing.
+  ff_train_params = NULL, # List of parameters for model training.
+  threshold = threshold, # Threshold value for predictions
+  overwrite = FALSE # Logical value indicating whether to overwrite existing files.
+)
+
 
 # plot the prediction probabilities
 plot(prediction_pretrained)
@@ -53,7 +61,6 @@ prediction_new_model = ForestForesight::train_predict_raster(country = country,
                                                               train_end = "2021-12-01",
                                                               ff_folder = dir_ff, # folder containing the input data
                                                               verbose = TRUE,
-                                                              label_threshold = 1,
                                                               model_path = file.path(dir_ff,paste0(country, "ExampleModel.model")), # where to save the model
                                                               # when ground truth is available a accuracy csv can be created
                                                               accuracy_csv = file.path(dir_ff,"accuracy_analysis", paste0("example", country, "newmodel.csv")))
