@@ -31,7 +31,11 @@ parser$add_argument("-p", "--prep_folder",
                     required = FALSE,
                     default= "D:/ff-dev/results/preprocessed/",
                     help = "Location of the preprocessed data folder")
-
+parser$add_argument("-dr", "--dryrun",
+                    dest = "dryrun",
+                    required = FALSE,
+                    default= "0",
+                    help = "checks only if files need to be processed")
 # Parse arguments
 args <- parser$parse_args()
 if(!dir.exists(args$input_folder)){stop("input folder does not exist")}
@@ -80,6 +84,7 @@ utbp=unique(file.path(dirname(tobeprocessed),paste0(substr(basename(tobeprocesse
 utbp=utbp[grep("layer",utbp)]
 utbp=unique(utbp)
 utbp=sample(utbp,length(utbp))
+
 commandtxts=paste("python",
                   args$script_location,
                   paste0(args$input_folder,basename(dirname(utbp)),".tif"),
@@ -94,9 +99,10 @@ commandtxts=paste("python",
                   "--groundtruth12m",
                   as.numeric(!(as.Date(substr(basename(utbp),10,19))>as.Date(gtdate12m))))
 
+cat(paste("processing",length(commandtxts),"files\n"))
+if(args$dryrun=="1"){stop()}
 cl <- makeCluster(getOption("cl.cores", cores))
 clusterExport(cl, "commandtxts")
-cat(paste("processing",length(commandtxts),"files\n"))
 results <- clusterApply(cl, commandtxts, system)
 
 # Stop the cluster
