@@ -76,7 +76,7 @@ for (group in groups[2:length(groups)]){
         shape <- countries[which(countries$iso3 == country),]
         fullras <- terra::mask(fullras,shape)
         fullras <- terra::crop(fullras,shape)
-        writeRaster(predicted_raster, paste0("D:/ff-dev/predictionsZillah/amountPred/", country,'/', country ,'_', date, "_amountPrediction.tif"), overwrite = T )
+        writeRaster(fullras, paste0("D:/ff-dev/predictionsZillah/amountPred/", country,'/', country ,'_', date, "_amountPrediction.tif"), overwrite = T )
 
 
       }
