@@ -10,21 +10,23 @@ groups = unique(countries$group)
 dates = daterange("2023-06-01","2023-12-01")
 exp_name = "pred_amounts_all"
 
-for (group in groups[2:length(groups)]){
+for (group in c("Brazil")){
   tryCatch({
     countriessel = countries$iso3[which(countries$group == group)]
     if (file.exists(file.path("D:/ff-dev/predictionsZillah/models",group,paste0(group,"_",exp_name,".model")))){
       model_amounts = file.path("D:/ff-dev/predictionsZillah/models",group,paste0(group,"_",exp_name,".model"))
+      cat("Using trained model for ", group , '\n')
     } else{
+      cat("Training a new model for ", group, "\n")
       traindata = ff_prep(datafolder = "D:/ff-dev/results/preprocessed/",
                           country = countriessel,start = "2022-01-01",end = "2022-12-01",
                           fltr_features = c("initialforestcover"),fltr_condition = c(">0"),
-                          sample_size = 0.2,verbose = F,shrink = "extract",
+                          sample_size = 0.1,verbose = F,shrink = "extract",
                           label_threshold = NA,addxy = F,
                           groundtruth_pattern = "groundtruth6m", validation_sample = 0.2)
       model_amounts = ff_train(traindata$data_matrix,traindata$validation_matrix,eta = 0.2,gamma = 0.2,
                                min_child_weight = 3,max_depth = 6,nrounds = 500,
-                               subsample = 0.3,verbose = T,
+                               subsample = 0.3,verbose = F,
                                modelfilename = file.path("D:/ff-dev/predictionsZillah/models",group,paste0(group,"_",exp_name,".model")),
                                features = traindata$features,eval_metric = "rmse", objective = "reg:squarederror")
     }
