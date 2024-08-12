@@ -7,10 +7,10 @@ data("countries")
 countries = vect(countries)
 Sys.setenv("xgboost_datafolder" = "D:/ff-dev/results/preprocessed")
 groups = unique(countries$group)
-dates = daterange("2023-06-01","2023-12-01")
+dates = daterange("2023-06-01", "2023-12-01")
 exp_name = "pred_amounts_all"
 
-for (group in c("Brazil")){
+for (group in "Brazil"){
   tryCatch({
     countriessel = countries$iso3[which(countries$group == group)]
     if (file.exists(file.path("D:/ff-dev/predictionsZillah/models",group,paste0(group,"_",exp_name,".model")))){
