@@ -28,18 +28,17 @@ group = countries$group[countries$iso3 == country]
 modelname = file.path(dir_ff,"models", group, paste0(group, ".model"))
 
 # run train_predict_raster function
-prediction_pretrained <- ForestForesight::train_predict_raster(
+prediction_pretrained <- ff_run(
   country = country, # ISO3 country code. Either `shape` or `country` should be given
   prediction_date = "2023-01-01", # Date for prediction in "YYYY-MM-DD" format
-  model = modelname, # Pre-trained model. If NULL, the function will train a model. Default is NULL
+  trained_model = modelname, # Pre-trained model. If NULL, the function will train a model. Default is NULL
   ff_folder = dir_ff, # Folder directory containing the input data
   verbose = TRUE, # Logical value indicating whether to display progress messages. Default is TRUE
-  model_path = modelname, # The path for saving the model
   accuracy_csv = file.path(dir_ff, "accuracy_analysis", paste0("example", country, "model.csv")), # Path to save accuracy metrics in CSV format. Default is NA (no CSV output)
-  shape = NULL, # Spatial object representing the shapefile. Either `shape` or `country` should be given.
+  shape = NULL, # Spatial object representing the shape file. Either `shape` or `country` should be given.
   train_start = NULL, # Starting date for training data in "YYYY-MM-DD" format.
   train_end = NULL, # Ending date for training data in "YYYY-MM-DD" format.
-  ff_prep_params = NULL, # List of parameters for data preprocessing.
+  ff_prep_params = NULL, # List of parameters for data pre-processing.
   ff_train_params = NULL, # List of parameters for model training.
   threshold = threshold, # Threshold value for predictions
   overwrite = FALSE # Logical value indicating whether to overwrite existing files.
@@ -55,13 +54,13 @@ plot(prediction_pretrained > threshold)
 
 # Let's train a new model only on the data from Gabon
 
-prediction_new_model = ForestForesight::train_predict_raster(country = country,
-                                                              prediction_date = "2023-01-01",
-                                                              train_start = "2021-01-01", # the model will be trained on the year 2021
-                                                              train_end = "2021-12-01",
+prediction_new_model = ff_run(country = country, prediction_dates = daterange("2023-06-01","2023-07-01"),
+                                                              train_start = "2022-01-01", # the model will be trained on the year 2021
+                                                              train_end = "2022-02-01",
                                                               ff_folder = dir_ff, # folder containing the input data
                                                               verbose = TRUE,
-                                                              model_path = file.path(dir_ff,paste0(country, "ExampleModel.model")), # where to save the model
+                                                              save_path_predictions = file.path(dir_ff, "predictiontest.tif"),
+                                                              save_path = file.path(dir_ff,paste0(country, "ExampleModel.model")), # where to save the model
                                                               # when ground truth is available a accuracy csv can be created
                                                               accuracy_csv = file.path(dir_ff,"accuracy_analysis", paste0("example", country, "newmodel.csv")))
 

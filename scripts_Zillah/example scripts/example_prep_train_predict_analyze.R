@@ -46,18 +46,17 @@ traindata <- ff_prep(
   # In this case we will use country
   country = country,       # Country or countries for which the data is prepared
   shape = NA,              # SpatVector for which the data is prepared
-  tiles = NULL,            # Vector of tiles in the syntax of e.g. 10N_080W
+  # tiles = "10N_000E",            # Vector of tiles in the syntax of e.g. 10N_080W
   groundtruth_pattern = "groundtruth6m",  # Pattern to identify ground truth files
   start = "2021-01-01",    # Start date for training data in the format "YYYY-MM-DD"
-  end = "2021-12-01",      # End date for training data in the format "YYYY-MM-DD"
+  end = "2021-02-01",      # End date for training data in the format "YYYY-MM-DD"
   inc_features = NA,       # Vector of included features
   exc_features = NA,       # Vector of excluded features
   fltr_features = "initialforestcover", # Only select pixels with a forest cover above 0
   fltr_condition = ">0",   # Vector of filtering conditions
   validation_sample = 0,   # Float indicating how much of the dataset should be used for validation
-  sample_size = 0.3,       # Fraction size of the random sample
+  sample_size = 0.01,       # Fraction size of the random sample
   adddate = TRUE,          # Boolean indicating whether the date is relative
-  sampleraster = TRUE,     # Boolean indicating if sampling raster should be used
   verbose = FALSE,         # Boolean indicating whether to print progress messages
   shrink = "extract",      # Option to shrink the input area if a country was selected
   window = NA,             # Set the extent on which to process
