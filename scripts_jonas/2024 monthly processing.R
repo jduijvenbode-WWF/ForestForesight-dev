@@ -2,10 +2,9 @@ library(ForestForesight)
 library(sf)
 data(countries)
 ff_folder="C:/data/storage"
-proc_date <- "2024-05-01"
+proc_dates <- "2024-08-01"
 countrynames=countries$iso3
 
-proc_dates=rev(as.character(daterange("2023-06-01","2024-05-01")))
 for(proc_date in proc_dates){
   for(x in seq(length(countrynames))){
     country <- countrynames[x]
@@ -20,19 +19,17 @@ for(proc_date in proc_dates){
       modelpath=file.path(ff_folder,"models",modelname,paste0(modelname,".model"))
       if(!file.exists(modelpath)){stop(paste(modelpath,"does not exist"))}
       tryCatch({
-        b <- train_predict_raster(shape = shape,
-                                  prediction_date = proc_date,
+        b <- ff_run(shape = shape,
+                                  prediction_dates = proc_date,
                                   ff_folder = ff_folder,
                                   verbose = TRUE,
-                                  model = modelpath)
+                                  trained_model = modelpath)
         terra::writeRaster(b,paste0(country,"_",proc_date,".tif"),overwrite = T)
       }, error = function(e) {
         # Print the error message
         print(paste("An error occurred:", e))
         # Continue the loop or execute other code as needed
       })
-
-
     }
   }
 }
