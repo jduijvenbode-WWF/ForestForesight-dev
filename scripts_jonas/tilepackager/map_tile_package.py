@@ -78,6 +78,6 @@ arcpy.management.CreateMapTilePackage(
     extent="DEFAULT",
     compression_quality=75,
     package_type="tpkx",
-    min_level_of_detail=0,
+    min_level_of_detail=1,
     create_multiple_packages="CREATE_SINGLE_PACKAGE",
 )
