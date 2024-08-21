@@ -7,7 +7,7 @@ data("countries")
 countries = vect(countries)
 Sys.setenv("xgboost_datafolder" = "D:/ff-dev/results/preprocessed")
 groups = unique(countries$group)
-dates = daterange("2022-06-01","2023-07-01")
+dates = "2024-07-01"
 exp_name = "pred_amounts"
 
 for (group in groups) {
