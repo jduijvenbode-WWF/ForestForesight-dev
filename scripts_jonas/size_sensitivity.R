@@ -2,16 +2,10 @@ library(ForestForesight)
 setwd("D:/ff-dev/results/preprocessed/input/")
 tile="10N_080W"
 tiles=vect(get(data("gfw_tiles")))
-center=centroids(tiles[which(tiles$tile_id==tile),])
-pixsize=res(rast(list.files(path=tile,full.names = T)))[1]
-pixsize=pixsize*110000
-scales=c(1e5,1e6,1e7,1e8,1e9,1e10)*440
-radius=sqrt(scales/pi)
-buffsize=sqrt(scales*pixsize/pi)
-for(i in seq_along(radius)){
-  pol=buffer(center,radius[i])
-  if(i==1){allpols=pol}else{allpols=rbind(allpols,pol)}
-}
+tileext=ext(tiles[tiles$tile_id==tile])
+allpols=as.polygons(c(tileext,tileext-2.5,tileext-4,tileext-4.5,tileext-4.75,tileext-4.9))
+crs(allpols)=crs(tiles)
+
 # for(i in seq(length(allpols))){
 #   ff_run(shape=allpols[i,],train_start = "2023-01-01",train_end="2023-06-01",ff_folder="D:/ff-dev/results/",
 #          save_path = paste0("D:/ff-dev/results/experimentation/size_sensitivity/size_",i,".model"),autoscale_sample = T, validation = T)
