@@ -44,21 +44,39 @@ class DeforestationDataset(Dataset):
         # Calculate the number of 40x40 blocks in the raster
         self.num_blocks_x = self.input_src.width // 40
         self.num_blocks_y = self.input_src.height // 40
+        
+        # Create a list to store indices of non-zero blocks
+        self.non_zero_blocks = []
+        
+        # Scan the input file to find non-zero blocks
+        print("Scanning input file for non-zero blocks...")
+        for y in range(self.num_blocks_y):
+            for x in range(self.num_blocks_x):
+                # Define a 40x40 window
+                window = Window(x*40, y*40, 40, 40)
+                # Read the block data
+                block = self.input_src.read(1, window=window)
+                # If any pixel in the block is non-zero, add its coordinates to the list
+                if np.any(block != 0):
+                    self.non_zero_blocks.append((x, y))
+        
+        # Print statistics about non-zero blocks
+        print(f"Found {len(self.non_zero_blocks)} non-zero blocks out of {self.num_blocks_x * self.num_blocks_y} total blocks")
+        print(f"Percentage of non-zero blocks: {len(self.non_zero_blocks) / (self.num_blocks_x * self.num_blocks_y) * 100:.2f}%")
 
     def __len__(self):
-        # The total number of 40x40 blocks in the raster
-        return self.num_blocks_x * self.num_blocks_y
+        # Return the number of non-zero blocks
+        return len(self.non_zero_blocks)
 
     def __getitem__(self, idx):
-        # Convert 1D index to 2D coordinates
-        x = idx % self.num_blocks_x
-        y = idx // self.num_blocks_x
-
-        # Read 40x40 block from input raster
+        # Get the coordinates of the non-zero block
+        x, y = self.non_zero_blocks[idx]
+        
+        # Read 40x40 block from input
         window = Window(x*40, y*40, 40, 40)
         input_block = self.input_src.read(1, window=window)
 
-        # Preprocess input data
+        # Preprocess input
         # Extract confidence (first digit) and date (last 4 digits)
         confidence = input_block // 10000
         date = input_block % 10000
