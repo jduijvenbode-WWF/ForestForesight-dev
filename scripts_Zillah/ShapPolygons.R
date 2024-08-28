@@ -7,12 +7,12 @@ groups = unique(countries$group)
 ff_folder = "D:/ff-dev/results"
 date = "2023-08-01"
 analysis_polygons = NULL
-threshold = 0.5
+threshold = 0.9
 csvfile = paste0("D:/ff-dev/results/accuracy_analysis/SHAP", gsub("\\.", "", as.character(threshold)) ,".csv")
 append = T
 
 
-for (country in countries$iso3[1:6]) {
+for (country in countries$iso3) {
   cat("starting on ", country ,"\n")
   prediction_rast= rast(paste0("D:/ff-dev/results/predictions/",country, '/', country, "_",date, ".tif"))>threshold
   plot(prediction_rast)

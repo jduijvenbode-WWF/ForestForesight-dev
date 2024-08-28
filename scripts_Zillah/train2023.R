@@ -6,7 +6,7 @@ countries <- terra::vect(countries)
 groups = unique(countries$group)
 ff_folder = "D:/ff-dev/results"
 t = 35
-prediction_date = "2024-08-01"
+prediction_date = daterange("2024-01-01", "2024-07-01")
 
 ### Train models including all features ###
 
@@ -47,8 +47,9 @@ for (group in groups[35:45]) {
 
 ### Make predictions ####
 
-t = 76
-for (country in countries$iso3[76]) {
+prediction_date = daterange("2023-02-01", "2024-02-01")
+t = 1
+for (country in countries$iso3) {
   print(paste0("starting on country: ", country, " (", t, " from ", length(countries$iso3),") " ))
   t=t+1
   group = countries$group[countries$iso3 == country]
@@ -56,8 +57,10 @@ for (country in countries$iso3[76]) {
   ff_run(country = country,
          ff_folder = ff_folder,
          prediction_dates = prediction_date,
-         save_path_predictions = paste0("D:/ff-dev/results/predictions/",country, '/', country, "_",prediction_date, ".tif"),
-         trained_model = trained_model)
+         accuracy_csv = "D:/ff-dev/results/accuracy_analysis/smallmodels.csv",
+         save_path_predictions = paste0("D:/ff-dev/results/predictions/",country, '/', country, ".tif"),
+         trained_model = trained_model,
+         verbose = T)
 }
 
 
