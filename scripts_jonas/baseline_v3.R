@@ -1,5 +1,6 @@
-setwd("D:/ff-dev/results/preprocessed")
-outputfile="../accuracy_analysis/baseline_20240501.csv"
+#setwd("D:/ff-dev/results/preprocessed")
+setwd("C:/data/storage/preprocessed")
+outputfile="../accuracy_analysis/baseline_20240826.csv"
 library(ForestForesight)
 files=list.files(recursive=T,pattern="groundtruth6m")
 
@@ -30,6 +31,8 @@ calculate_scores=function(predfile,groundtruthfile,pols,adddate=T,fmaskfile=NULL
   pols=pols[-which(rowSums(as.data.frame(pols)[,c("FP","FN","TP")],na.rm=T)==0),]
   return(pols)
 }
+files=c(files[grep("2023",files)])
+files=files[-c(grep("2023-01",files),grep("2023-12",files))]
 for(x in 1:length(files)){
   file=files[x]
   cat(paste0(file," (",x," out of",length(files),")\n"))
@@ -42,8 +45,8 @@ for(x in 1:length(files)){
 
 }
 ap=as.data.frame(allpols)
-
-write.csv(ap,outputfile)
+op=read.csv(outputfile)
+write.csv(op,outputfile)
 # calculate precision, recall, F1 and F0.5. These are not used in powerbi because the score also depends on the size of the polygon
 # so the scores below should be calculated on the highest order of scale you are presenting in the data
 # example: a polygon of 10x10 meters should not have the same impact on total F05 as a polygon of 10000x10000 meters with many more FN, FP, TP and TN

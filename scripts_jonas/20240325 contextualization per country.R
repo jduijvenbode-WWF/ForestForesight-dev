@@ -14,12 +14,12 @@ gadm_s <- terra::vect("C:/data/storage/contextualization/GADM.gpkg")
 arcpy_location <- '\"C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe\"'
 script_location <- 'C:/data/git/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
 ff_folder <- "C:/data/storage"
-proc_date <- "2024-08-01"
+proc_date <- "2024-07-01"
 
 countrynames <- c("Laos","Colombia","Gabon","Bolivia","Madre de Dios","Suriname","Peru","Kalimantan","Guaviare")
 isos <- c("LAO","COL","GAB","BOL","PER","SUR","PER","IDN","COL")
 
-for (x in seq(length(countrynames))) {
+for (x in seq(length(countrynames))[4]) {
   country <- countrynames[x]
   cat(paste("processing",country,"\n"))
   countryiso <- isos[x]

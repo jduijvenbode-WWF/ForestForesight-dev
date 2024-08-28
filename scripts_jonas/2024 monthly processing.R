@@ -6,7 +6,7 @@ proc_dates <- "2024-08-01"
 countrynames=countries$iso3
 
 for(proc_date in proc_dates){
-  for(x in seq(length(countrynames))){
+  for(x in seq(length(countrynames))[c(1,2,4,5,6,10)]){
     country <- countrynames[x]
     cat(paste("processing",country,"\n"))
     setwd("C:/data/storage/predictions/")
@@ -24,6 +24,7 @@ for(proc_date in proc_dates){
                                   ff_folder = ff_folder,
                                   verbose = TRUE,
                                   trained_model = modelpath)
+
         terra::writeRaster(b,paste0(country,"_",proc_date,".tif"),overwrite = T)
       }, error = function(e) {
         # Print the error message
