@@ -18,7 +18,7 @@ trainDataTest$data_matrix$features = trainDataTest$data_matrix$features[defInd,]
 
 # Transform labels
 trainLabels=trainDataTest$data_matrix$label
-catLabels = quantile(trainLabels, probs=catQuantiles)
+mooimm
 
 # Note XGBoost requires that the class labels start at 0 and increase sequentially to the maximum number of classes
 categorized <- cut(trainLabels, breaks = c(0,unname(catLabels),1600), labels=seq(0,length(catQuantiles)), right = FALSE, include.lowest = TRUE)
