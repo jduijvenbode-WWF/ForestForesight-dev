@@ -11,6 +11,7 @@ for (x in 1:nrow(gfw_tiles)) {
     newfilename=file.path("C:/data/roaddist/", paste0(tile$tile_id, "_roaddist_",date,".tif"))
     if(!file.exists(newfilename)){
       tryCatch({
+        rm(a);rm(b)
         a = ohsome_elements_geometry(
           boundary = st_bbox(c(xmin = xmin(tile), xmax = xmax(tile)-5, ymax = ymax(tile), ymin = ymin(tile)), crs = st_crs(4326)),
           filter = "type:way and highway=* and geometry:line",

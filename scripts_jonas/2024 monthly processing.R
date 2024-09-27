@@ -2,11 +2,11 @@ library(ForestForesight)
 library(sf)
 data(countries)
 ff_folder="C:/data/storage"
-proc_dates <- "2024-08-01"
+proc_dates <- "2024-09-01"
 countrynames=countries$iso3
 
 for(proc_date in proc_dates){
-  for(x in seq(length(countrynames))[c(1,2,4,5,6,10)]){
+  for(x in seq(length(countrynames))){
     country <- countrynames[x]
     cat(paste("processing",country,"\n"))
     setwd("C:/data/storage/predictions/")
