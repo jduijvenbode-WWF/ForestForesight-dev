@@ -10,7 +10,7 @@ dates = daterange("2023-06-01","2023-12-01")
 
 
 for (date in dates) {
-  for (country in countries$iso3) {
+  for (country in countries$iso3[countries$iso3!="BRA"]) {
     amounts = rast(paste0("D:/ff-dev/predictionsZillah/amountPred/", country,'/', country ,'_', date, "_amountPrediction.tif"))
     confidence = rast(paste0("D:/ff-dev/results/predictions/", country,"/",country, "_", date, ".tif"))
     LAQ = amounts * confidence # calculate the likelihood adjusted confidence
@@ -37,10 +37,29 @@ for (date in dates) {
     cor_confidence = cor(values(confidence),values(groundtruth),use = "complete.obs")[1]
     cor_LAQ = cor(values(LAQ),values(groundtruth),use = "complete.obs")[1]
 
+    # Define the data frame
+    data_cor <- data.frame(
+      country = country,
+      date = date,
+      cor_amounts = cor_amounts,
+      cor_confidence = cor_confidence,
+      cor_LAQ = cor_LAQ
+    )
 
+    # Define the file path
+    file_path_cor <- "D:/ff-dev/predictionsZillah/correlation_groundtruth.csv"
 
-    write.csv(data.frame(country = country, date = date, cor_amounts = cor_amounts, cor_confidence = cor_confidence, cor_LAQ = cor_LAQ),
-              file = "D:/ff-dev/predictionsZillah/correlation_groundtruth.csv" )
+    # Check if the file exists
+    if (file.exists(file_path_cor)) {
+      # File exists, append the data
+      write.table(data_cor, file = file_path_cor, sep = ",", col.names = FALSE, row.names = FALSE, append = TRUE)
+    } else {
+      # File does not exist, create the file with the data frame
+      write.csv(data_cor, file = file_path_cor, row.names = FALSE)
+    }
+#
+#     write.csv(data.frame(country = country, date = date, cor_amounts = cor_amounts, cor_confidence = cor_confidence, cor_LAQ = cor_LAQ),
+#               file = "D:/ff-dev/predictionsZillah/correlation_groundtruth.csv", append = T )
 
 
     F05_confidence = getFscore(values(as.numeric((groundtruth > 0))) , values(confidence, 0.5))
@@ -73,12 +92,26 @@ for (date in dates) {
     highest_F05_method <- methods[max_index]
 
     # Add the highest method name as a new column in the results data frame
-    results$Highest_F05_Method <- highest_F05_method
-    results$country=country
-    results$date=date
+    if (length(highest_F05_method) == 0) {results$Highest_F05_Method = NA
+    }else{results$Highest_F05_Method <- highest_F05_method}
+    results$country = country
+    results$date = date
+
+
+    # Define the file path
+    file_path <- "D:/ff-dev/predictionsZillah/confidence_amounts_LAQ.csv"
+
+    # Check if the file exists
+    if (file.exists(file_path)) {
+      # File exists, append the data
+      write.table(results, file = file_path, sep = ",", col.names = FALSE, row.names = FALSE, append = TRUE)
+    } else {
+      # File does not exist, create the file with the data frame
+      write.csv(results, file = file_path, row.names = FALSE)
+    }
 
     # Write the results to a CSV file
-    write.csv(results, file = "D:/ff-dev/predictionsZillah/confidence_amounts_LAQ.csv", row.names = FALSE)
+    #write.csv(results, file = "D:/ff-dev/predictionsZillah/confidence_amounts_LAQ.csv", row.names = FALSE, append = TRUE)
 
     cat("For", country, date, ", correlation amounts:", round(cor_amounts,2),
         "confidence:", round(cor_confidence,2),
