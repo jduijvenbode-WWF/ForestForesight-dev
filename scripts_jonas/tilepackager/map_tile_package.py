@@ -95,6 +95,6 @@ arcpy.management.SharePackage(
     public="MYGROUPS",
     groups="'Forest Foresight'",
     organization="EVERYBODY",
-    publish_web_layer="FALSE",
+    publish_web_layer="TRUE",
     portal_folder=""
 )
