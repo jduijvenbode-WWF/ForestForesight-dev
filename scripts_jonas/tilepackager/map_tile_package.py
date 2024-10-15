@@ -16,7 +16,7 @@ class TemplateNotFoundError(Exception):
 ws = os.path.dirname(__file__)
 template = os.path.join(ws, r'temps\template.aprx')
 
-temp_lyr = os.path.join(ws, r"temps\lyr2.lyrx")
+temp_lyr = os.path.join(ws, r"temps\lyr.lyrx")
 if not os.path.exists(template) or not os.path.exists(temp_lyr):
     raise TemplateNotFoundError('Template Not Found (folder named temps in same location as python script)')
     
