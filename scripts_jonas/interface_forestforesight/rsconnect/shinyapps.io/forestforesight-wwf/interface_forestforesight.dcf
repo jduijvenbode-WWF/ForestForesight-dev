@@ -1,0 +1,10 @@
+name: interface_forestforesight
+title:
+username: forestforesight-wwf
+account: forestforesight-wwf
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 12590706
+bundleId: 9060967
+url: https://forestforesight-wwf.shinyapps.io/interface_forestforesight/
+version: 1

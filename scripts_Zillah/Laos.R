@@ -58,7 +58,7 @@ dev.off()
 
 # SHAP #
 library("SHAPforxgboost")
-shap_sample= laos_train$data_matrix$features[sample(nrow(laos_train$data_matrix$features), 1000),]
+shap_sample = laos_train$data_matrix$features[sample(nrow(laos_train$data_matrix$features), 1000),]
 shap_values = shap.values(xgb_model = laos_model, X_train = shap_sample)
 # The ranked features by mean |SHAP|
 shap_values$mean_shap_score
