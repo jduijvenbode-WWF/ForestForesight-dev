@@ -30,6 +30,7 @@ args = parser.parse_args()
 image = args.image
 output = args.output
 country = args.country
+date = args.date
 
 dirname = os.path.dirname(output)
 basename = os.path.basename(output)
