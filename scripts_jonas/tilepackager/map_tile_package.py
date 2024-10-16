@@ -34,8 +34,8 @@ image = args.image
 output = args.output
 country = args.country
 date = args.date
-upload = args.upload
-overwrite = args.overwrite
+upload = int(args.upload)
+overwrite = int(args.overwrite)
 
 dirname = os.path.dirname(output)
 basename = os.path.basename(output)
