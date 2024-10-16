@@ -107,7 +107,7 @@ if overwrite and upload:
     layer_name = os.path.splitext(os.path.basename(output))[0]
     arcpy.server.ReplaceWebLayer(
         target_layer="https://tiles.arcgis.com/tiles/RTK5Unh1Z71JKIiR/arcgis/rest/services/"+layer_name+"/MapServer",
-        archive_layer_name=layername+"_archive",
+        archive_layer_name=layer_name+"_archive",
         update_layer="https://tiles.arcgis.com/tiles/RTK5Unh1Z71JKIiR/arcgis/rest/services/"+layer_name[0:(len(layer_name)-11)]+"/MapServer",
         replace_item_info="TRUE",
         create_new_item="FALSE"
