@@ -2,7 +2,7 @@ library(ForestForesight)
 library(sf)
 data(countries)
 ff_folder="C:/data/storage"
-proc_dates <- "2024-09-01"
+proc_dates <- "2024-10-01"
 countrynames=countries$iso3
 
 for(proc_date in proc_dates){
@@ -16,7 +16,7 @@ for(proc_date in proc_dates){
       cat(paste("processing",country,"for",proc_date,"\n"))
       shape <- terra::vect(countries)[which(countries$iso3 == country),]
       modelname=countries$group[which(countries$iso3==country)]
-      modelpath=file.path(ff_folder,"models",modelname,paste0(modelname,".model"))
+      modelpath=tail(list.files(file.path(ff_folder,"models",modelname),pattern="model$",full.names = T),1)
       if(!file.exists(modelpath)){stop(paste(modelpath,"does not exist"))}
       tryCatch({
         b <- ff_run(shape = shape,
