@@ -83,37 +83,37 @@ def process_geotiff(input_file, output_file,relative_date,num_windows,groundtrut
         window_width = width // 2
         window_height = height // 2
         latest_deforestation_file=output_file.replace("layer","timesinceloss")
-        create_latest_deforestation= not os.path.isfile(latest_deforestation_file)
+        create_latest_deforestation= os.path.isfile(latest_deforestation_file)
         threemonths_file=output_file.replace("layer","lastthreemonths")
-        create_threemonths = not os.path.isfile(threemonths_file)
+        create_threemonths = os.path.isfile(threemonths_file)
         sixmonths_file=output_file.replace("layer","lastsixmonths")
-        create_sixmonths = not os.path.isfile(sixmonths_file) 
+        create_sixmonths = os.path.isfile(sixmonths_file) 
         twelvetosixmonths_file=output_file.replace("layer","previoussameseason")
-        create_twelvetosixmonths = not os.path.isfile(twelvetosixmonths_file)
+        create_twelvetosixmonths = os.path.isfile(twelvetosixmonths_file)
         totaldeforestation_file=output_file.replace("layer","totallossalerts")
-        create_totaldeforestation = not os.path.isfile(totaldeforestation_file)
+        create_totaldeforestation = os.path.isfile(totaldeforestation_file)
         groundtruth1m_file=output_file.replace("layer","groundtruth1m").replace("input","groundtruth")
         groundtruth1m_file=modify_date_in_path(groundtruth1m_file,1)
-        create_groundtruth1m = not os.path.isfile(groundtruth1m_file) and groundtruth1m_called==1
+        create_groundtruth1m = os.path.isfile(groundtruth1m_file) and groundtruth1m_called==1
         groundtruth3m_file=output_file.replace("layer","groundtruth3m").replace("input","groundtruth")
         groundtruth3m_file=modify_date_in_path(groundtruth3m_file,3)
-        create_groundtruth3m = not os.path.isfile(groundtruth3m_file) and groundtruth3m_called==1
+        create_groundtruth3m = os.path.isfile(groundtruth3m_file) and groundtruth3m_called==1
         groundtruth6m_file=output_file.replace("layer","groundtruth6m").replace("input","groundtruth")
         groundtruth6m_file=modify_date_in_path(groundtruth6m_file,6)
-        create_groundtruth6m = not os.path.isfile(groundtruth6m_file) and groundtruth6m_called==1
+        create_groundtruth6m = os.path.isfile(groundtruth6m_file) and groundtruth6m_called==1
         groundtruth12m_file=output_file.replace("layer","groundtruth12m").replace("input","groundtruth")
         groundtruth12m_file=modify_date_in_path(groundtruth12m_file,12)
-        create_groundtruth12m = not os.path.isfile(groundtruth12m_file) and groundtruth12m_called==1
+        create_groundtruth12m = os.path.isfile(groundtruth12m_file) and groundtruth12m_called==1
         confidence_file=output_file.replace("layer","confidence")
-        create_confidence = not os.path.isfile(confidence_file)
+        create_confidence = os.path.isfile(confidence_file)
         patchiness_file=output_file.replace("layer","patchdensity")
-        create_patchiness = not os.path.isfile(patchiness_file)
+        create_patchiness = os.path.isfile(patchiness_file)
         smoothedtotal_file=output_file.replace("layer","smoothedtotal")
-        create_smoothedtotal = not os.path.isfile(smoothedtotal_file)
+        create_smoothedtotal = os.path.isfile(smoothedtotal_file)
         smoothedsixmonths_file=output_file.replace("layer","smoothedsixmonths")
-        create_smoothedsixmonths = not os.path.isfile(smoothedsixmonths_file)
+        create_smoothedsixmonths = os.path.isfile(smoothedsixmonths_file)
         lastmonth_file=output_file.replace("layer","lastmonth")
-        create_lastmonth = not os.path.isfile(lastmonth_file)
+        create_lastmonth = os.path.isfile(lastmonth_file)
         # Iterate over windows
         if any([create_confidence,create_groundtruth1m,create_groundtruth3m,create_groundtruth6m,create_groundtruth12m,create_totaldeforestation,create_sixmonths,create_threemonths,
             create_twelvetosixmonths,create_latest_deforestation,create_patchiness,create_smoothedtotal,create_smoothedsixmonths,create_lastmonth,create_groundtruth12m,create_groundtruth1m,create_groundtruth3m,create_groundtruth6m]):
