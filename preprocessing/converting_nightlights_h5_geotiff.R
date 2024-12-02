@@ -1,5 +1,5 @@
 datafolder='D:/ff-dev/nighttime/converted2/'
-downloadfolder="D:/ff-dev/nighttime/VNP46A3/2024/"
+downloadfolder="D:/ff-dev/nighttime/VNP46A3/2023/"
 setwd(downloadfolder)
 files=list.files(path=downloadfolder,recursive=T,pattern="h5$",full.names=T)
 print(length(files))

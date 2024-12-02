@@ -1,6 +1,6 @@
 #setwd("D:/ff-dev/results/preprocessed")
 setwd("D:/ff-dev/results/preprocessed")
-days=260
+days=40
 outputfile=paste0("../accuracy_analysis/baseline_",days,".csv")
 library(ForestForesight)
 files=list.files(recursive=T,pattern="groundtruth6m")
@@ -11,7 +11,7 @@ calculate_scores=function(predfile,groundtruthfile,pols,adddate=T,fmaskfile=NULL
   date=substr(basename(groundtruthfile),10,19)
   pred=rast(predfile)
   pred_threshold <- round((as.numeric(difftime(as.Date(date), as.Date("2015-01-01"), units = "days"))-days)/
-    as.numeric(difftime(as.Date(date), as.Date("2015-01-01"), units = "days"))*10000)
+                            as.numeric(difftime(as.Date(date), as.Date("2015-01-01"), units = "days"))*10000)
 
   pred=(pred>pred_threshold)*(pred>0)
   pred[is.na(pred)]=0
