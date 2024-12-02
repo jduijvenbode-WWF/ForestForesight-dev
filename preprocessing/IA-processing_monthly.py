@@ -79,6 +79,7 @@ def process_geotiff(input_file, output_file,relative_date,num_windows,groundtrut
         width = src.width
         height = src.height
 
+
         # Calculate the number of windows (4 equal parts)
         window_width = width // 2
         window_height = height // 2
@@ -117,6 +118,7 @@ def process_geotiff(input_file, output_file,relative_date,num_windows,groundtrut
         # Iterate over windows
         if any([create_confidence,create_groundtruth1m,create_groundtruth3m,create_groundtruth6m,create_groundtruth12m,create_totaldeforestation,create_sixmonths,create_threemonths,
             create_twelvetosixmonths,create_latest_deforestation,create_patchiness,create_smoothedtotal,create_smoothedsixmonths,create_lastmonth,create_groundtruth12m,create_groundtruth1m,create_groundtruth3m,create_groundtruth6m]):
+            
             for i in range(num_windows):
                 # Calculate the starting coordinates of the window
                 col_offset = (i % 2) * window_width
@@ -138,10 +140,7 @@ def process_geotiff(input_file, output_file,relative_date,num_windows,groundtrut
                     if create_confidence: confidence=template.copy()
                     if create_patchiness: patchiness=template.copy()
                     if create_lastmonth: lastmonth=template.copy()
-                    if create_groundtruth1m: groundtruth1m=template.copy()
-                    if create_groundtruth3m: groundtruth3m=template.copy()
-                    if create_groundtruth6m: groundtruth6m=template.copy()
-                    if create_groundtruth12m: groundtruth12m=template.copy()
+
                 offx2=(offx1+(template.shape[0]//2))
                 offy2=(offy1+(template.shape[1]//2))
 
@@ -149,16 +148,11 @@ def process_geotiff(input_file, output_file,relative_date,num_windows,groundtrut
                 # Take the remainder of 10000 for every pixel
                 if create_confidence: confidence[offx1:offx2,offy1:offy2]=aggregate_by_40_max((np.remainder(np.nan_to_num(data), 10000)<relative_date).astype(int)*data//10000,fun="nanmean")
                 data = np.remainder(np.nan_to_num(data), 10000)
-                if create_groundtruth1m: 
-                    groundtruth1m[offx1:offx2,offy1:offy2]=aggregate_by_40_max(((data<=(relative_date+30))&(data>relative_date)).astype(int),fun="sum")
-                if create_groundtruth3m: 
-                    groundtruth3m[offx1:offx2,offy1:offy2]=aggregate_by_40_max(((data<=(relative_date+61))&(data>relative_date)).astype(int),fun="sum")
-                if create_groundtruth6m: 
-                    groundtruth6m[offx1:offx2,offy1:offy2]=aggregate_by_40_max(((data<=(relative_date+182))&(data>relative_date)).astype(int),fun="sum")
-                if create_groundtruth12m: 
-                    groundtruth12m[offx1:offx2,offy1:offy2]=aggregate_by_40_max(((data<=(relative_date+365))&(data>relative_date)).astype(int),fun="sum")
                 #remove all future data for the next features
                 data[data>relative_date]=0
+
+                
+                
 
 
                 #remove current date from data to get relative date, ignoring 0's, then aggregate by 40.     
@@ -222,19 +216,19 @@ def process_geotiff(input_file, output_file,relative_date,num_windows,groundtrut
 
             if create_groundtruth1m:
                 with rasterio.open(groundtruth1m_file, 'w', driver='GTiff',compress='LZW', width=width//40, height=height//40, count=1, dtype="uint16", crs=src.crs, transform=newtransform) as dst:
-                    dst.write(groundtruth1m.reshape(1,groundtruth1m.shape[0],groundtruth1m.shape[1]))
+                    dst.write(lastmonth.reshape(1,lastmonth.shape[0],lastmonth.shape[1]))
                     
             if create_groundtruth3m:
                 with rasterio.open(groundtruth3m_file, 'w', driver='GTiff',compress='LZW', width=width//40, height=height//40, count=1, dtype="uint16", crs=src.crs, transform=newtransform) as dst:
-                    dst.write(groundtruth3m.reshape(1,groundtruth3m.shape[0],groundtruth3m.shape[1]))
+                    dst.write(threemonths.reshape(1,threemonths.shape[0],threemonths.shape[1]))
 
             if create_groundtruth6m:
                 with rasterio.open(groundtruth6m_file, 'w', driver='GTiff',compress='LZW', width=width//40, height=height//40, count=1, dtype="uint16", crs=src.crs, transform=newtransform) as dst:
-                    dst.write(groundtruth6m.reshape(1,groundtruth6m.shape[0],groundtruth6m.shape[1]))
+                    dst.write(sixmonths.reshape(1,sixmonths.shape[0],sixmonths.shape[1]))
 
             if create_groundtruth12m:
                 with rasterio.open(groundtruth12m_file, 'w', driver='GTiff',compress='LZW', width=width//40, height=height//40, count=1, dtype="uint16", crs=src.crs, transform=newtransform) as dst:
-                    dst.write(groundtruth12m.reshape(1,groundtruth12m.shape[0],groundtruth12m.shape[1]))
+                    dst.write((sixmonths+twelvetosixmonths).reshape(1,twelvetosixmonths.shape[0],twelvetosixmonths.shape[1]))
 
 
 if __name__ == "__main__":

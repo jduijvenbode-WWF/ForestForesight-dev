@@ -1,13 +1,6 @@
 library(ForestForesight)
-library(terra)
 library(zip)
 
-
-
-#workdir=("C:/data/dashboard_data")
-#ff_folder <- "C:/data/storage"
-#arcpy_location <- '\"C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe\"'
-#script_location <- 'C:/data/git/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
 workdir=("D:/ff-dev/dashboards")
 ff_folder <- "D:/ff-dev/results/"
 arcpy_location <- "D:/ff-dev/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe"
@@ -17,7 +10,7 @@ proc_date <- "2024-11-01"
 countrynames <- c("Laos", "Gabon", "Bolivia", "Peru", "Kalimantan", "Guaviare")
 isos <- c("LAO", "GAB", "BOL", "PER", "IDN", "COL")
 countries=vect(get(data("countries")))
-for (x in rev(seq(length(countrynames)))) {
+for (x in rev(seq(length(countrynames)))[3]) {
   country <- countrynames[x]
   cat(paste("Processing", country, "\n"))
   countryiso <- isos[x]
@@ -59,16 +52,16 @@ for (x in rev(seq(length(countrynames)))) {
     if(!overwrite){tpkx_file <- paste0("ForestForesight_predictions_",country,".tpkx")}else{
     tpkx_file <- paste0("ForestForesight_predictions_",country,"_",proc_date,".tpkx")}
     if (file.exists(tpkx_file)) {file.remove(tpkx_file)}
-    # system(paste(arcpy_location,
-    #              script_location,
-    #              paste0('\"', file.path(getwd(), paste0(country, ".tif")), '\"'),
-    #              paste0('\"', file.path(getwd(), tpkx_file), '\"'),
-    #              country,
-    #              proc_date,
-    #              1,
-    #              as.numeric(overwrite)
-    #              ))
-    print(paste(arcpy_location, script_location, paste0('\"', file.path(getwd(), paste0(country, ".tif")), '\"'), paste0('\"', file.path(getwd(), tpkx_file), '\"')))
+    system(paste(arcpy_location,
+                 script_location,
+                 paste0('\"', file.path(getwd(), paste0(country, ".tif")), '\"'),
+                 paste0('\"', file.path(getwd(), tpkx_file), '\"'),
+                 country,
+                 proc_date,
+                 1,
+                 as.numeric(overwrite)
+                 ))
+
     # Create zip file with shapefiles
     zip_file <- paste0(country, "_risk_areas.zip")
     files=list.files(pattern="_risk\\.")
