@@ -68,7 +68,7 @@ for (x in rev(seq(length(countrynames)))) {
     #              1,
     #              as.numeric(overwrite)
     #              ))
-
+    print(paste(arcpy_location, script_location, paste0('\"', file.path(getwd(), paste0(country, ".tif")), '\"'), paste0('\"', file.path(getwd(), tpkx_file), '\"')))
     # Create zip file with shapefiles
     zip_file <- paste0(country, "_risk_areas.zip")
     files=list.files(pattern="_risk\\.")

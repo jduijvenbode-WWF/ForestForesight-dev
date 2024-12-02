@@ -2,7 +2,7 @@ library(ForestForesight)
 library(sf)
 data(countries)
 ff_folder="C:/data/storage"
-proc_dates <- "2024-10-01"
+proc_dates <- "2024-11-01"
 countrynames=countries$iso3
 
 for(proc_date in proc_dates){
