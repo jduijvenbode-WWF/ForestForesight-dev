@@ -23,10 +23,9 @@ for (proc_date in proc_dates) {
         b <- ff_run(shape = shape,
                                   prediction_dates = proc_date,
                                   ff_folder = ff_folder,
-                                  verbose = TRUE,
-                                  trained_model = modelpath)
+                                  verbose = TRUE,pretrained_model_path = modelpath)
 
-        terra::writeRaster(b,paste0(country,"_",proc_date,".tif"),overwrite = T)
+        terra::writeRaster(b$predictions,paste0(country,"_",proc_date,".tif"),overwrite = T)
       }, error = function(e) {
         # Print the error message
         print(paste("An error occurred:", e))

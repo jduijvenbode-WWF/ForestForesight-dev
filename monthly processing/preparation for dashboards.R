@@ -1,18 +1,18 @@
 library(ForestForesight)
 library(zip)
 
-workdir=("D:/ff-dev/dashboards")
-ff_folder <- "D:/ff-dev/results/"
-arcpy_location <- "D:/ff-dev/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe"
-script_location <- 'C:/Users/EagleView/Documents/GitHub/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
+workdir=("C:/data/dashboard_data/")
+ff_folder <- "C:/data/storage/"
+arcpy_location <- "'C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe'"
+script_location <- 'C:data/git/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
 
-proc_date <- "2024-11-01"
+proc_date <- "2024-12-01"
 countrynames <- c("Laos", "Gabon", "Bolivia", "Peru", "Kalimantan", "Guaviare")
 isos <- c("LAO", "GAB", "BOL", "PER", "IDN", "COL")
 countries=vect(get(data("countries")))
-for (x in rev(seq(length(countrynames)))[3]) {
+for (x in seq(length(countrynames))[1]) {
   country <- countrynames[x]
-  cat(paste("Processing", country, "\n"))
+  ff_cat(paste("Processing", country))
   countryiso <- isos[x]
   setwd(workdir)
   dir.create(country, showWarnings = FALSE)
@@ -42,9 +42,9 @@ for (x in rev(seq(length(countrynames)))[3]) {
     terra::writeRaster(colras, paste0(country, ".tif"), overwrite = TRUE)
 
     # Create risk polygons
-    medium_risk <- ff_polygonize(colras, threshold = "medium", output_file = paste0(country, "_medium_risk.shp"),verbose = T,calc_max = T)
-    high_risk <- ff_polygonize(colras, threshold = "high", output_file = paste0(country, "_high_risk.shp"),verbose=T,calc_max = T,contain_polygons = medium_risk)
-    highest_risk <- ff_polygonize(colras, threshold = "very high", output_file = paste0(country, "_highest_risk.shp"),verbose=T,calc_max = T, contain_polygons = high_risk)
+    medium_risk <- ff_polygonize(colras, threshold = "medium", output_file = paste0(country, "_medium_risk.shp"),verbose = T,calculate_max_count = T)
+    high_risk <- ff_polygonize(colras, threshold = "high", output_file = paste0(country, "_high_risk.shp"),verbose=T,calculate_max_count = T,contain_polygons = medium_risk)
+    highest_risk <- ff_polygonize(colras, threshold = "very high", output_file = paste0(country, "_highest_risk.shp"),verbose=T,calculate_max_count = T, contain_polygons = high_risk)
 
     # Create tpkx
     cat("Creating tpkx\n")
@@ -52,15 +52,17 @@ for (x in rev(seq(length(countrynames)))[3]) {
     if(!overwrite){tpkx_file <- paste0("ForestForesight_predictions_",country,".tpkx")}else{
     tpkx_file <- paste0("ForestForesight_predictions_",country,"_",proc_date,".tpkx")}
     if (file.exists(tpkx_file)) {file.remove(tpkx_file)}
-    system(paste(arcpy_location,
+    system(paste(
+                 shQuote(arcpy_location),
                  script_location,
-                 paste0('\"', file.path(getwd(), paste0(country, ".tif")), '\"'),
-                 paste0('\"', file.path(getwd(), tpkx_file), '\"'),
+                 file.path(getwd(), paste0(country, ".tif")),
+                 file.path(getwd(), tpkx_file),
                  country,
                  proc_date,
                  1,
-                 as.numeric(overwrite)
-                 ))
+                 as.numeric(overwrite),
+                 collapse = " "
+    ))
 
     # Create zip file with shapefiles
     zip_file <- paste0(country, "_risk_areas.zip")
