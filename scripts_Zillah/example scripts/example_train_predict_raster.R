@@ -12,7 +12,6 @@ library(ForestForesight)
 
 # load data
 data("countries")
-
 # Gabon will be used as an example country
 country = "GAB" # use iso3 country code
 

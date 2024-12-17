@@ -50,14 +50,14 @@ for (group in groups[35:45]) {
 prediction_date = daterange("2023-02-01", "2024-02-01")
 t = 1
 for (country in countries$iso3) {
-  print(paste0("starting on country: ", country, " (", t, " from ", length(countries$iso3),") " ))
+  ff_cat(paste0("starting on country: ", country, " (", t, " from ", length(countries$iso3),") " ),color="red")
   t=t+1
   group = countries$group[countries$iso3 == country]
   trained_model = paste0("D:/ff-dev/results/models/", group,"/", group,"_small.model")
   ff_run(country = country,
          ff_folder = ff_folder,
          prediction_dates = prediction_date,
-         accuracy_csv = "D:/ff-dev/results/accuracy_analysis/smallmodels.csv",
+         accuracy_csv = "D:/ff-dev/results/accuracy_analysis/smallmodels_20240827.csv",
          save_path_predictions = paste0("D:/ff-dev/results/predictions/",country, '/', country, ".tif"),
          trained_model = trained_model,
          verbose = T)
