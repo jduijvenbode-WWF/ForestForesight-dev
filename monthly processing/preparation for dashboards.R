@@ -5,187 +5,212 @@ library(future)
 library(furrr)
 library(dplyr)
 
-workdir <- "C:/data/dashboard_data/"
-ff_folder <- "C:/data/storage/"
-arcpy_location <- "'C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe'"
-script_location <- 'C:data/git/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
-proc_date <- format(lubridate::floor_date(Sys.Date(), "month"), "%Y-%m-01")
+# Define explicit directory paths
+working_directory <- "C:/data/dashboard_data/"
+forest_foresight_folder <- "C:/data/storage/"
+arcgis_python_location <- "'C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe'"
+python_script_location <- 'C:data/git/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
+processing_date <- format(lubridate::floor_date(Sys.Date(), "month"), "%Y-%m-01")
 
-# Setup parallel processing
-n_cores <- parallel::detectCores(logical = FALSE) %/% 2
-plan(multisession, workers = n_cores)
+# Setup parallel processing with explicit core count
+available_cores <- parallel::detectCores(logical = FALSE)
+parallel_cores <- available_cores %/% 2
+plan(multisession, workers = parallel_cores)
 
-# Create directories
-poly_dir <- file.path(workdir, "polygons")
-dir.create(poly_dir, recursive = TRUE, showWarnings = FALSE)
+# Create directories with explicit names
+polygon_directory <- file.path(working_directory, "polygons")
+dir.create(polygon_directory, recursive = TRUE, showWarnings = FALSE)
 
-# Load countries and convert to data.frame for parallel processing
-countries_df <- as.data.frame(vect(get(data("countries"))))
-countries_df$geometry <- NULL  # Remove geometry column
+# Load countries dataset
+countries_dataset <- as.data.frame(vect(get(data("countries"))))
+countries_dataset$geometry <- NULL  # Remove geometry column
 
-setwd(workdir)
+setwd(working_directory)
 
 # Define the processing function for each country
 process_country <- function(country_row) {
-  countryiso <- country_row$iso3
-  country_name <- country_row$name
+  country_iso_code <- country_row$iso3
+  country_full_name <- country_row$name
 
-  result <- list(
-    error = NULL
+  processing_result <- list(
+    error = NULL,
+    raster = NULL
   )
 
   tryCatch({
-    ff_cat(paste("Processing", country_name), verbose = TRUE)
+    ff_cat(paste("Processing", country_full_name), verbose = TRUE)
 
-    rast_path <- file.path(Sys.getenv("FF_FOLDER"), "predictions", countryiso,
-                           paste0(countryiso, "_", proc_date, ".tif"))
+    raster_file_path <- file.path(Sys.getenv("FF_FOLDER"), "predictions", country_iso_code,
+                                  paste0(country_iso_code, "_", processing_date, ".tif"))
 
-    if(file.exists(rast_path)) {
-      # Process risk levels and save files directly
-      medium_risk <- ff_polygonize(
-        rast_path,  # Pass the path instead of the raster object
+    if(file.exists(raster_file_path)) {
+      # Load and project raster
+      country_raster <- rast(raster_file_path)
+      projected_raster <- project(country_raster, "epsg:3857")
+
+      # Process risk levels before reclassification
+      medium_risk_result <- ff_polygonize(
+        projected_raster,
         threshold = "medium",
-        output_file = file.path(poly_dir, paste0(countryiso, "_medium.shp")),
+        output_file = file.path(polygon_directory, paste0(country_iso_code, "_medium.shp")),
         verbose = TRUE,
         calculate_max_count = TRUE
       )
 
-      if(has_value(medium_risk$polygons)) {
-        max_count <- medium_risk$max_count
+      if(has_value(medium_risk_result$polygons)) {
+        max_polygon_count <- medium_risk_result$max_count
 
-        # Save medium risk result directly to file
-        medium_risk$polygons$country <- countryiso
-        writeVector(medium_risk$polygons,
-                    file.path(poly_dir, paste0(countryiso, "_medium.shp")),
+        # Save medium risk polygons
+        medium_risk_result$polygons$country <- country_iso_code
+        writeVector(medium_risk_result$polygons,
+                    file.path(polygon_directory, paste0(country_iso_code, "_medium.shp")),
                     overwrite = TRUE)
 
-        high_risk <- ff_polygonize(
-          rast_path,
+        high_risk_result <- ff_polygonize(
+          projected_raster,
           threshold = "high",
-          output_file = file.path(poly_dir, paste0(countryiso, "_high.shp")),
+          output_file = file.path(polygon_directory, paste0(country_iso_code, "_high.shp")),
           verbose = TRUE,
-          max_polygons = max_count,
-          contain_polygons = medium_risk$polygons
+          max_polygons = max_polygon_count,
+          contain_polygons = medium_risk_result$polygons
         )
 
-        if(has_value(high_risk$polygons)) {
-          high_risk$polygons$country <- countryiso
-          writeVector(high_risk$polygons,
-                      file.path(poly_dir, paste0(countryiso, "_high.shp")),
+        if(has_value(high_risk_result$polygons)) {
+          high_risk_result$polygons$country <- country_iso_code
+          writeVector(high_risk_result$polygons,
+                      file.path(polygon_directory, paste0(country_iso_code, "_high.shp")),
                       overwrite = TRUE)
 
-          very_high_risk <- ff_polygonize(
-            rast_path,
+          very_high_risk_result <- ff_polygonize(
+            projected_raster,
             threshold = "very high",
-            output_file = file.path(poly_dir, paste0(countryiso, "_very_high.shp")),
+            output_file = file.path(polygon_directory, paste0(country_iso_code, "_very_high.shp")),
             verbose = TRUE,
-            max_polygons = max_count,
-            contain_polygons = high_risk$polygons
+            max_polygons = max_polygon_count,
+            contain_polygons = high_risk_result$polygons
           )
 
-          if(has_value(very_high_risk$polygons)) {
-            very_high_risk$polygons$country <- countryiso
-            writeVector(very_high_risk$polygons,
-                        file.path(poly_dir, paste0(countryiso, "_very_high.shp")),
+          if(has_value(very_high_risk_result$polygons)) {
+            very_high_risk_result$polygons$country <- country_iso_code
+            writeVector(very_high_risk_result$polygons,
+                        file.path(polygon_directory, paste0(country_iso_code, "_very_high.shp")),
                         overwrite = TRUE)
           }
         }
       }
 
-      # Return success status
+      # Reclassify values after polygonization
+      projected_raster[projected_raster < 0.5] <- NA
+
+      # Return success status and processed raster
       return(list(
         status = "success",
-        countryiso = countryiso,
-        files_created = TRUE
+        countryiso = country_iso_code,
+        files_created = TRUE,
+        raster = projected_raster
       ))
     }
   },
-  error = function(e) {
+  error = function(error_message) {
     return(list(
       status = "error",
-      countryiso = countryiso,
-      error = conditionMessage(e),
-      timestamp = Sys.time()
+      countryiso = country_iso_code,
+      error = conditionMessage(error_message),
+      timestamp = Sys.time(),
+      raster = NULL
     ))
   })
 }
 
 # Process countries in parallel
-ff_cat(sprintf("Processing countries in parallel using %d cores", n_cores))
-results <- future_map(
-  1:nrow(countries_df),
-  ~process_country(countries_df[.x,]),
+ff_cat(sprintf("Processing countries in parallel using %d cores", parallel_cores))
+processing_results <- future_map(
+  1:nrow(countries_dataset),
+  ~process_country(countries_dataset[.x,]),
   .options = furrr_options(seed = TRUE)
 )
 
+# Extract and combine rasters
+ff_cat("Combining all rasters")
+country_raster_list <- lapply(processing_results, function(x) x$raster)
+filtered_raster_list <- Filter(Negate(is.null), country_raster_list)
+unnamed_raster_list <- unname(filtered_raster_list)
+merged_raster <- do.call(merge, unnamed_raster_list)
+
+# Write combined raster
+ff_cat("Writing combined raster")
+writeRaster(merged_raster,
+            filename = file.path(working_directory, paste0("combined_raster_", processing_date, ".tif")),
+            overwrite = TRUE)
+
 # Process errors
-errors <- Filter(function(x) x$status == "error", results)
-if(length(errors) > 0) {
+error_results <- Filter(function(x) x$status == "error", processing_results)
+if(length(error_results) > 0) {
   ff_cat("The following countries had errors:")
-  for(error in errors) {
-    ff_cat(sprintf("\n%s:\n", error$countryiso))
-    print(error$error)
+  for(error_result in error_results) {
+    ff_cat(sprintf("\n%s:\n", error_result$countryiso))
+    print(error_result$error)
   }
 }
 
-# Now combine all the individual files
+# Combine all the individual files
 ff_cat("Combining all risk files")
 
 # Function to safely read and combine vector files
 combine_risk_files <- function(risk_level) {
-  pattern <- paste0("_", risk_level, ".shp$")
-  files <- list.files(poly_dir, pattern = pattern, full.names = TRUE)
+  shapefile_pattern <- paste0("_", risk_level, ".shp$")
+  shapefile_list <- list.files(polygon_directory, pattern = shapefile_pattern, full.names = TRUE)
   if(risk_level=="high"){
-    print(length(files))
-    files=files[-grep("very",files)]
-    print(length(files))
+    print(length(shapefile_list))
+    shapefile_list <- shapefile_list[-grep("very", shapefile_list)]
+    print(length(shapefile_list))
   }
-  if(length(files) > 0) {
-    vectors <- lapply(files, function(f) {
+  if(length(shapefile_list) > 0) {
+    vector_list <- lapply(shapefile_list, function(shapefile) {
       tryCatch({
-        vect(f)
+        vect(shapefile)
       }, error = function(e) NULL)
     })
-    vectors <- Filter(Negate(is.null), vectors)
+    valid_vectors <- Filter(Negate(is.null), vector_list)
 
-    if(length(vectors) > 0) {
-      return(do.call(rbind, vectors))
+    if(length(valid_vectors) > 0) {
+      return(do.call(rbind, valid_vectors))
     }
   }
   return(NULL)
 }
 
-# Combine results
-all_medium_risk <- combine_risk_files("medium")
-all_high_risk <- combine_risk_files("high")
-all_very_high_risk <- combine_risk_files("very_high")
+# Combine results for each risk level
+combined_medium_risk <- combine_risk_files("medium")
+combined_high_risk <- combine_risk_files("high")
+combined_very_high_risk <- combine_risk_files("very_high")
 
 # Create output directory
-output_dir <- file.path(workdir, "combined_risk_areas")
-dir.create(output_dir, showWarnings = FALSE)
+output_directory <- file.path(working_directory, "combined_risk_areas")
+dir.create(output_directory, showWarnings = FALSE)
 
 # Write combined files
 ff_cat("Writing combined risk shapefiles")
-if(!is.null(all_medium_risk)) {
-  writeVector(all_medium_risk, file.path(output_dir, "combined_medium_risk.shp"), overwrite = TRUE)
+if(!is.null(combined_medium_risk)) {
+  writeVector(combined_medium_risk, file.path(output_directory, "combined_medium_risk.shp"), overwrite = TRUE)
 }
-if(!is.null(all_high_risk)) {
-  writeVector(all_high_risk, file.path(output_dir, "combined_high_risk.shp"), overwrite = TRUE)
+if(!is.null(combined_high_risk)) {
+  writeVector(combined_high_risk, file.path(output_directory, "combined_high_risk.shp"), overwrite = TRUE)
 }
-if(!is.null(all_very_high_risk)) {
-  writeVector(all_very_high_risk, file.path(output_dir, "combined_very_high_risk.shp"), overwrite = TRUE)
+if(!is.null(combined_very_high_risk)) {
+  writeVector(combined_very_high_risk, file.path(output_directory, "combined_very_high_risk.shp"), overwrite = TRUE)
 }
 
 # Create zip file
 ff_cat("Creating zip archive")
-zip_file <- file.path(workdir, paste0("combined_risk_areas_", proc_date, ".zip"))
-files_to_zip <- list.files(output_dir, full.names = TRUE)
+zip_file_path <- file.path(working_directory, paste0("combined_risk_areas_", processing_date, ".zip"))
+files_to_archive <- list.files(output_directory, full.names = TRUE)
 
 zip::zip(
-  zipfile = zip_file,
-  files = files_to_zip,
+  zipfile = zip_file_path,
+  files = files_to_archive,
   mode = "cherry-pick"
 )
 
 ff_cat("Processing complete")
-ff_cat(paste("Output zip file:", zip_file))
+ff_cat(paste("Output zip file:", zip_file_path))
