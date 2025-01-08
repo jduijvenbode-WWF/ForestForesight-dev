@@ -6,8 +6,8 @@ library(furrr)
 library(dplyr)
 
 # Define explicit directory paths
-working_directory <- "C:/data/dashboard_data/"
-forest_foresight_folder <- "C:/data/storage/"
+working_directory <- "D:/ff-dev/dashboard"
+forest_foresight_folder <- get_variable("FF_FOLDER")
 arcgis_python_location <- "'C:/Program Files/ArcGIS/Pro/bin/Python/envs/arcgispro-py3/python.exe'"
 python_script_location <- 'C:data/git/ForestForesight-dev/scripts_jonas/tilepackager/map_tile_package.py'
 processing_date <- format(lubridate::floor_date(Sys.Date(), "month"), "%Y-%m-01")
@@ -23,7 +23,7 @@ dir.create(polygon_directory, recursive = TRUE, showWarnings = FALSE)
 
 # Load countries dataset
 countries_dataset <- as.data.frame(vect(get(data("countries"))))
-countries_dataset$geometry <- NULL  # Remove geometry column
+
 
 setwd(working_directory)
 
@@ -100,7 +100,6 @@ process_country <- function(country_row) {
       }
 
       # Reclassify values after polygonization
-      projected_raster[projected_raster < 0.5] <- NA
 
       # Return success status and processed raster
       return(list(
@@ -135,7 +134,7 @@ ff_cat("Combining all rasters")
 country_raster_list <- lapply(processing_results, function(x) x$raster)
 filtered_raster_list <- Filter(Negate(is.null), country_raster_list)
 unnamed_raster_list <- unname(filtered_raster_list)
-merged_raster <- do.call(merge, unnamed_raster_list)
+merged_raster <- do.call(terra::merge, unnamed_raster_list)
 
 # Write combined raster
 ff_cat("Writing combined raster")
@@ -211,6 +210,18 @@ zip::zip(
   files = files_to_archive,
   mode = "cherry-pick"
 )
+raster_file_path <- list.files(file.path(Sys.getenv("FF_FOLDER"), "predictions"),recursive=T, pattern=processing_date,full.names = T)
+load_and_convert <- function(raster){
+  raster=rast(raster)
+  #raster <- project(rast(raster),"epsg:3857")
+  raster[raster<0.5]=NA
+  return(raster)
+}
+all_rasters <- sapply(raster_file_path,function(x) load_and_convert(x))
+all_rasters <- unname(all_rasters)
+merged_raster <- do.call(terra::merge,all_rasters)
+raster <- project(merged_raster,"epsg:3857",filename="2024-12-01_global_predictions.tif")
+
 
 ff_cat("Processing complete")
 ff_cat(paste("Output zip file:", zip_file_path))

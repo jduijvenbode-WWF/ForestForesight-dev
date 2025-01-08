@@ -1,36 +1,46 @@
 library(ForestForesight)
 library(sf)
-data(countries)
-ff_folder <- "C:/data/storage"
-proc_dates <- c("2024-12-01")
-countrynames <- countries$iso3
+countries=vect(get(data("countries")))
+ff_folder <- "D:/ff-dev/results"
+proc_date <- format(Sys.Date(), "%Y-%m-01")
+groups <- unique(countries$group)
+setwd(ff_folder)
+levels = c("medium","high","very high")
 
+for (group in groups) {
+  sel_countries <- countries[countries$group==group,]
+  ff_cat(paste("processing",group))
 
-for (proc_date in proc_dates) {
-  for (x in seq(length(countrynames))) {
-    country <- countrynames[x]
-    ff_cat(paste("processing",country))
-    setwd(file.path(ff_folder,"predictions"))
-    if (!dir.exists(country)) {dir.create(country)}
-    setwd(country)
-    if (!file.exists(paste0(country,"_",proc_date,".tif"))) {
-      ff_cat(paste("processing",country,"for",proc_date))
-      shape <- terra::vect(countries)[which(countries$iso3 == country),]
-      modelname <- countries$group[which(countries$iso3 == country)]
-      modelpath <- tail(list.files(file.path(ff_folder,"models",modelname),pattern = "model$",full.names = T), 1)
-      if (!file.exists(modelpath)) {stop(paste(modelpath,"does not exist"))}
-      tryCatch({
-        b <- ff_run(shape = shape,
-                                  prediction_dates = proc_date,
-                                  ff_folder = ff_folder,
-                                  verbose = TRUE,pretrained_model_path = modelpath)
+  shape <- terra::aggregate(sel_countries)
+  modelname <- group
+  modelpath <- tail(list.files(file.path(ff_folder,"models",modelname),pattern = "model$",full.names = T), 1)
 
-        terra::writeRaster(b$predictions,paste0(country,"_",proc_date,".tif"),overwrite = T)
-      }, error = function(e) {
-        # Print the error message
-        print(paste("An error occurred:", e))
-        # Continue the loop or execute other code as needed
-      })
-    }
+  tiffiles = paste0("predictions/",sel_countries$iso3,"/",sel_countries$iso3,"_",proc_date,".tif")
+  risk_areas = paste0("risk_areas/",sel_countries$iso3,"/",sel_countries$iso3,"_",proc_date,".gpkg")
+  if(!all(file.exists(tiffiles)) && !all(file.exists(risk_areas))){
+    if (!file.exists(modelpath)) {stop(paste(modelpath,"does not exist"))}
   }
+  tryCatch({
+    result <- ff_run(shape = shape,
+                     prediction_dates = proc_date,
+                     ff_folder = ff_folder,
+                     verbose = TRUE,pretrained_model_path = modelpath)
+    for(x in seq(nrow(sel_countries))){
+      sel_shape <- sel_countries[x,]
+      sel_raster <- mask(crop(result$predictions,sel_shape),sel_shape)
+      terra::writeRaster(sel_raster,tiffiles[x],overwrite = T)
+      for (i in seq(3)) {
+        sel_poly <- result$risk_zones[[1]][[i]][sel_shape]
+        if (length(sel_poly) > 0) {
+          writeVector(sel_poly,filename = risk_areas[x],layer=levels[i],insert = (i > 1),overwrite = (i == 1))
+        }
+      }
+    }
+  }, error = function(e) {
+    # Print the error message
+    print(paste("An error occurred:", e))
+    # Continue the loop or execute other code as needed
+  })
 }
+
+
