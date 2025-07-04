@@ -108,28 +108,33 @@ process_fire_alerts <- function(target_month = NULL, overwrite = FALSE) {
     
     fire_raster <- rasterize(vect(tile_fires), template, fun = "length", background = 0)
     n_satellites <- length(unique(tile_fires$satellite))
-    avg_alerts <- fire_raster / n_satellites
+    avg_alerts <- clamp(fire_raster / n_satellites, upper = 46, values= TRUE)
+    avg_alerts_transformed = round((avg_alerts / 46 ) * 255)
     
-    writeRaster(avg_alerts, out_file_1m, overwrite = TRUE)
-    } else {
-      avg_alerts <- rast(out_file_1m)  # Load existing raster
-    }
+    writeRaster(avg_alerts_transformed , out_file_1m, overwrite = TRUE,
+                datatype = "INT1U",
+                gdal = c("COMPRESS=LZW"))
+    } 
     
     # Step 2: Use the 1-month raster to create derived products
     existing_files <- list.files(tile_dir, pattern = "firealerts1m\\.tif$", full.names = TRUE)
     existing_files <- sort(existing_files)
     
     if(length(existing_files) >= 3 && (!file.exists(out_file_3m) || overwrite)) {
-      avg_3m <- mean(rast(tail(existing_files, 3)), na.rm = TRUE)
-      writeRaster(avg_3m, out_file_3m, overwrite = TRUE)
+      avg_3m <- clamp(mean(rast(tail(existing_files, 3)), na.rm = TRUE), upper = 40, values= TRUE)
+      writeRaster(round((avg_3m / 40 ) * 255), out_file_3m, overwrite = TRUE,
+                  datatype = "INT1U",
+                  gdal = c("COMPRESS=LZW"))
       cat("Saved 3-month average\n")
     } else if (file.exists(out_file_3m)) {
       cat("Skipped 3-month average (exists)\n")
     }
     
     if(length(existing_files) >= 6 && (!file.exists(out_file_6m) || overwrite)) {
-      avg_6m <- mean(rast(tail(existing_files, 6)), na.rm = TRUE)
-      writeRaster(avg_6m, out_file_6m, overwrite = TRUE)
+      avg_6m <- clamp(mean(rast(tail(existing_files, 6)), na.rm = TRUE), upper = 37, values= TRUE)
+      writeRaster(round((avg_6m / 37 ) * 255), out_file_6m, overwrite = TRUE,
+                  datatype = "INT1U",
+                  gdal = c("COMPRESS=LZW"))
       cat("Saved 6-month average\n")
     } else if (file.exists(out_file_6m)) {
       cat("Skipped 6-month average (exists)\n")
@@ -137,8 +142,10 @@ process_fire_alerts <- function(target_month = NULL, overwrite = FALSE) {
     
     if(length(existing_files) >= 12 && (!file.exists(out_file_6to12m) || overwrite)) {
       files_6to12 <- existing_files[(length(existing_files)-11):(length(existing_files)-5)]
-      avg_6to12m <- mean(rast(files_6to12), na.rm = TRUE)
-      writeRaster(avg_6to12m, out_file_6to12m, overwrite = TRUE)
+      avg_6to12m <- clamp(mean(rast(files_6to12), na.rm = TRUE),  upper = 35, values= TRUE)
+      writeRaster(round((avg_6to12 / 35 ) * 255), out_file_6to12m, overwrite = TRUE,
+                  datatype = "INT1U",
+                  gdal = c("COMPRESS=LZW"))
       cat("Saved 6–12 month average\n")
     } else if (file.exists(out_file_6to12m)) {
       cat("Skipped 6–12 month average (exists)\n")
@@ -152,8 +159,10 @@ process_fire_alerts <- function(target_month = NULL, overwrite = FALSE) {
        (!file.exists(out_file_trend) || overwrite)) {
       current_3m <- rast(out_file_3m)
       last_year_3m <- rast(last_year_3m_file)
-      yearly_trend <- current_3m - last_year_3m
-      writeRaster(yearly_trend, out_file_trend, overwrite = TRUE)
+      yearly_trend <- clamp(current_3m - last_year_3m, upper = 30, values= TRUE)
+      writeRaster(round((yearly_trend / 30 ) * 255), out_file_trend, overwrite = TRUE,
+                  datatype = "INT1U",
+                  gdal = c("COMPRESS=LZW"))
       cat("Saved yearly trend\n")
     } else if (file.exists(out_file_trend)) {
       cat("Skipped yearly trend (exists)\n")
@@ -173,3 +182,5 @@ process_fire_alerts <- function(target_month = NULL, overwrite = FALSE) {
 # Usage
 # process_fire_alerts()              # Current month
 # process_fire_alerts("2024-01")     # Specific month
+
+# note: max values (46 40 36 35 30) based on global 2024 max values 
