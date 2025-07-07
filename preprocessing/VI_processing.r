@@ -108,7 +108,7 @@ for (vi in vis){
     tiles_processed <- tiles_processed + 1
   }
   
-  cat("  Completed", tiles_processed, "tiles for", date, "\n\n")
+  cat("  Completed", tiles_processed, "tiles for", as.character(date), "\n\n")
   
   # Force garbage collection after processing all tiles
   gc()
